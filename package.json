@@ -2,15 +2,18 @@
   "name": "codecareerpath",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production node server",
+    "dev": "npx nodemon src/server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "http-status-codes": "^2.3.0",
+    "mongoose": "^8.8.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
