@@ -8,7 +8,9 @@ class CrudRepository {
   }
 
   async getAll() {
-    return await this.model.find();
+    const results = await this.model.find();
+
+    return results;
   }
 
   async getById(id) {

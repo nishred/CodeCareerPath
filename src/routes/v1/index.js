@@ -1,10 +1,13 @@
-const express = require("express")
+const express = require("express");
 
-const bootcampRouter = require("./bootcamp.routes") 
+const bootcampRouter = require("./bootcamp.routes");
 
-const router = express.Router()
+const router = express.Router();
 
+const courseRouter = require("./course.routes");
 
-router.use("/bootcamps",bootcampRouter)
+router.use("/bootcamps", bootcampRouter);
 
-module.exports = router
+router.use("/courses", courseRouter);
+
+module.exports = router;
