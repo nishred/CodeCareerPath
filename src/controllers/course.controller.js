@@ -89,6 +89,7 @@ const getCourse = asyncHandler(async (req, res, next) => {
   });
 });
 
+
 const removeCourse = asyncHandler(async (req, res, next) => {
   const result = await courseRepository.delete(req.params.id);
 

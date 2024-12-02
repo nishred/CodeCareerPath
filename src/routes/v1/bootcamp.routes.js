@@ -2,11 +2,14 @@ const express = require("express");
 
 const router = express.Router();
 
+const authorize = require("../../middlewares/authorize")
+
 
 const courseRouter = require("./course.routes");
 
 const { BootcampController } = require("../../controllers");
 
+const auth = require("../../middlewares/auth")
 
 router.use("/:bootcampId/courses", courseRouter); 
 
@@ -14,11 +17,13 @@ router.get("/", BootcampController.getAllBootcamps);
 
 router.get("/:id", BootcampController.getBootcampById);
 
-router.post("/", BootcampController.createBootcamp);
+router.post("/",auth,authorize("publisher","admin"),BootcampController.createBootcamp);
 
-router.put("/:id", BootcampController.updateBootcamp);
+router.put("/:id",auth,authorize("publisher","admin"),BootcampController.updateBootcamp);
 
-router.delete("/:id", BootcampController.deleteBootcamp);
+router.delete("/:id",auth,authorize("publisher","admin"),BootcampController.deleteBootcamp);
+
+router.put("/:id/photo",auth,authorize("publisher","admin"),BootcampController.uploadBootcampPhoto);
 
 router.get(
   "/radius/:zipcode/:distance",

@@ -27,18 +27,30 @@ class BootcampRepository extends CrudRepository {
   async getAll(queryParams) {
     const queryCopy = { ...queryParams };
 
+    console.log("step 1:", "queryCopy", queryCopy);
+
     // Remove fields from query
     const removeFields = ["select", "sort", "page", "limit"];
+
     removeFields.forEach((param) => delete queryCopy[param]);
 
     // Create query string
     let queryStr = JSON.stringify(queryCopy);
+
+    console.log("step 2:", "queryStr", queryStr);
+
     queryStr = queryStr.replace(
       /\b(gt|gte|lt|lte|in)\b/g,
       (match) => `$${match}`
     );
 
-    let query = this.model.find(JSON.parse(queryStr));
+    console.log("step 3: After Replace", queryStr);
+
+    const parsedQuery = JSON.parse(queryStr);
+
+    console.log("step 4: After parsing", parsedQuery);
+
+    let query = this.model.find(parsedQuery);
 
     // Select fields
     if (queryParams.select) {
@@ -60,11 +72,11 @@ class BootcampRepository extends CrudRepository {
         }
       });
 
-      console.log(sortObj);
-
       query = query.sort(sortObj);
     } else {
-      query = query.sort("-createdAt");
+      query = query.sort({
+        createdAt: -1,
+      });
     }
 
     // Pagination
@@ -120,3 +132,29 @@ class BootcampRepository extends CrudRepository {
 }
 
 module.exports = BootcampRepository;
+
+// mongoose advanced query
+
+// const getPosts = async (page = 2, limit = 5) => {
+//   try {
+//     const filter = {
+//       likes: { $gt: 100 }, // Likes greater than 100
+//       title: { $regex: /mongoose/i }, // Title containing "mongoose" (case-insensitive)
+//       createdAt: { $gte: new Date("2023-01-01") }, // Created after January 1, 2023
+//     };
+
+//     const posts = await Post.find(filter) // Apply the filter
+//       .sort({ likes: -1 }) // Sort by likes in descending order
+//       .skip((page - 1) * limit) // Skip posts for pagination
+//       .limit(limit) // Limit results to 5 per page
+//       .select("title likes author") // Select specific fields
+//       .populate("author", "name email"); // Populate author with name and email
+
+//     console.log(posts);
+//     return posts;
+//   } catch (error) {
+//     console.error("Error fetching posts:", error);
+//   }
+// };
+
+// getPosts();

@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-
 const slugify = require("slugify");
-
 const geocode = require("../utils/geocode");
 
 const BootcampSchema = new mongoose.Schema(
@@ -48,6 +46,17 @@ const BootcampSchema = new mongoose.Schema(
       required: [true, "Please add an address"],
     },
 
+    //embed an object within the schema
+
+    //  location : {
+
+    //    type : "Point",
+    //    coordinates : [lat,lng],
+        
+
+    //  }
+
+
     location: {
       // GeoJSON Point
       type: {
@@ -88,6 +97,7 @@ const BootcampSchema = new mongoose.Schema(
       min: [1, "Rating must be at least 1"],
       max: [10, "Rating must can not be more than 10"],
     },
+
     averageCost: Number,
 
     photo: {
@@ -138,6 +148,7 @@ BootcampSchema.pre("save", function (next) {
 });
 
 BootcampSchema.pre("save", async function (next) {
+
   const result = await geocode(this.address);
 
   const components = result.components;
