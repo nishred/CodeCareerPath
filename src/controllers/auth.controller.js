@@ -9,7 +9,7 @@ const { TokenExpiredError } = require("jsonwebtoken");
 
 const sendEmail = require("../utils/sendEmail");
 
-const crypto = require("crypto")
+const crypto = require("crypto");
 
 const userRepository = new UserRepository();
 
@@ -100,8 +100,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  
-   console.log("User",user.resetpasswordtoken)
+  console.log("User", user.resetpasswordtoken);
 
   //req.get("host") will give the host name to which the request was made to
   const resetUrl = `${req.protocol}://${req.get(
@@ -134,18 +133,21 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
-
 //@desc reset password
 //@route PUT /api/v1/auth/resetpassword/:resettoken
 //@access public
 
 const resetPassword = asyncHandler(async (req, res, next) => {
+  const resetpasswordtoken = crypto
+    .createHash("sha256")
+    .update(req.params.resettoken)
+    .digest("hex");
 
-  const resetpasswordtoken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
+  console.log(resetpasswordtoken);
 
-  console.log(resetpasswordtoken)
-
-  const user = await userRepository.getUserByResetPasswordToken(resetpasswordtoken);
+  const user = await userRepository.getUserByResetPasswordToken(
+    resetpasswordtoken
+  );
 
   if (!user) {
     throw new ErrorResponse("Invalid token", StatusCodes.BAD_REQUEST);
@@ -161,6 +163,56 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Password reset successful",
   });
+});
+
+
+
+//@desc update user details
+//@route PUT /api/v1/auth/updatedetails
+
+//@access private
+
+const updateDetails = asyncHandler(async (req, res, next) => {
+
+
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  }
+
+  const user = await userRepository.update(req.user._id, fieldsToUpdate);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: user
+  });
+
+
+})
+
+
+//@desc update user password
+//@route PUT /api/v1/auth/updatepassword
+//@access private
+
+const updatePassword = asyncHandler(async (req, res, next) => {
+
+
+  const user = await userRepository.getUserById(req.user._id).select("+password");
+
+  if (!(await user.matchPassword(req.body.currentPassword))) {
+    throw new ErrorResponse("Password is incorrect", StatusCodes.BAD_REQUEST);
+  }
+
+  user.password = req.body.newPassword;
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Password updated successfully"
+  });
+
 
 })
 
@@ -170,5 +222,7 @@ module.exports = {
   login,
   getLoggedInUser,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  updateDetails,
+  updatePassword
 };

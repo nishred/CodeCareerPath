@@ -1,8 +1,9 @@
 const User = require("../models/User");
+const CrudRepository = require("./crud.repository");
 
-class UserRepository {
+class UserRepository extends CrudRepository {
   constructor() {
-    this.model = User;
+    super(User);
   }
 
   async create(data) {
@@ -18,7 +19,7 @@ class UserRepository {
   }
 
   async getUserById(id) {
-    const user = await this.model.findById(id);
+    const user = await this.model.findById(id).select("+password");
 
     return user;
   }
@@ -29,8 +30,16 @@ class UserRepository {
       resetpasswordexpire: { $gt: Date.now() },
     });
 
-     return user
+    return user;
+  }
 
+  async update(id, data) {
+    const user = await this.model.finfByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
+
+    return user;
   }
 }
 
