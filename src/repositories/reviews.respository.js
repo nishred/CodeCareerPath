@@ -4,7 +4,7 @@ const { query } = require("express");
 
 class ReviewRepository extends CrudRepository {
   constructor() {
-    super(Review)
+    super(Review);
   }
 
   async getAllReviewsByBootcampId(bootcampId, queryParams) {
@@ -13,7 +13,7 @@ class ReviewRepository extends CrudRepository {
     //select,sort by rating
     //population
 
-    const copyParams = { ...queryParams };
+    let copyParams = { ...queryParams };
 
     const keywords = ["select", "sort", "page", "limit"];
 
@@ -49,19 +49,23 @@ class ReviewRepository extends CrudRepository {
 
     const pagination = {};
 
-    const totalDocuments = await query.countDocuments();
+    const totalDocuments = await this.model.find(copyParams).countDocuments();
 
     pagination.count = totalDocuments;
 
     const page = queryParams.page ? parseInt(queryParams.page) : 1;
 
-    const limit = queryParams.limit ? parseInt(queryParams.limit) : 10;
+    const limit = queryParams.limit
+      ? parseInt(queryParams.limit)
+      : Math.min(10, totalDocuments);
 
     const skipDocuments = (page - 1) * limit;
 
     query = query.skip(skipDocuments).limit(limit);
 
-    const nextDocuments = totalDocuments - skipDocuments;
+    const nextDocuments = totalDocuments - limit;
+
+    console.log(totalDocuments, skipDocuments);
 
     if (nextDocuments > 0) {
       const next = {
@@ -83,7 +87,10 @@ class ReviewRepository extends CrudRepository {
 
     const current = {
       pageNumber: page,
-      pageSize: Math.min(limit, nextDocuments),
+      pageSize: Math.min(
+        limit,
+        totalDocuments - skipDocuments > 0 ? totalDocuments - skipDocuments : 0
+      ),
     };
 
     pagination.current = current;

@@ -141,10 +141,9 @@ BootcampSchema.pre("save", function (next) {
 });
 
 BootcampSchema.pre("save", async function (next) {
+
   const result = await geocode(this.address);
-
   const components = result.components;
-
   this.location = {
     type: "Point",
     coordinates: [result.geometry["lng"], result.geometry["lat"]],
@@ -155,7 +154,6 @@ BootcampSchema.pre("save", async function (next) {
     zipcode: components.postcode,
     country: components.country,
   };
-
   next();
 });
 
@@ -165,6 +163,8 @@ BootcampSchema.pre("remove", async function (next) {
   await this.model("Course").deleteMany({ bootcamp: this._id });
   next();
 });
+
+
 
 //reverse populate with virtuals
 BootcampSchema.virtual("courses", {

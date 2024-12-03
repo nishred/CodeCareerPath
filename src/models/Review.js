@@ -38,6 +38,70 @@ const ReviewSchema = new mongoose.Schema({
   },
 });
 
+ReviewSchema.statics.computeAvgRating = async function (
+  bootcamp,
+  excludeCourseId
+) {
+  let filter = { bootcamp };
+
+  if (excludeCourseId) {
+    filter["_id"] = {
+      $neq: excludeCourseId,
+    };
+  }
+
+  const aggregationCompute = await this.aggregate([
+    { $match: filter },
+    {
+      $group: {
+        _id: "$bootcamp",
+        averageRating: {
+          $avg: "$rating",
+        },
+      },
+    },
+  ]);
+
+
+  console.log(aggregationCompute)
+
+  await mongoose.model("Bootcamp").findByIdAndUpdate(
+    bootcamp,
+    {
+      averageRating: aggregationCompute[0].averageRating,
+    },
+    {
+      runValidators: true,
+    }
+  );
+};
+
+ReviewSchema.post("save", async function () {
+  await mongoose.model("Review").computeAvgRating(this.bootcamp);
+  
+});
+
+ReviewSchema.post("findOneAndUpdate", async function (next) {
+  const updateObj = this.getUpdate();
+  const query = this.getQuery();
+
+  const bootcamp = await mongoose
+    .model("Review")
+    .findById(query._id)
+    .select("bootcamp");
+
+  if (updateObj.rating) {
+    await mongoose.model("Review").computeAvgRating(bootcamp);
+  }
+
+  next();
+});
+
+ReviewSchema.pre("delete", async function (next) {
+  await mongoose.model("Review").computeAvgRating(this.bootcamp, this._id);
+  next();
+});
+
 const Review = mongoose.model("Review", ReviewSchema);
 
 module.exports = Review;

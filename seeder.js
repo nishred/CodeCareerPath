@@ -33,7 +33,6 @@ const reviews = JSON.parse(
   fs.readFileSync(`${__dirname}/_data/reviews.json`, "utf-8")
 );
 
-
 const importData = async () => {
   try {
     await Bootcamp.create(bootcamps);
@@ -42,7 +41,7 @@ const importData = async () => {
 
     await User.create(users);
 
-    await Review.create(reviews)
+    await Review.create(reviews);
 
     console.log("Data Imported...");
     process.exit();
@@ -56,7 +55,7 @@ const deleteData = async () => {
     await Bootcamp.deleteMany();
     await Course.deleteMany();
     await User.deleteMany();
-    await Review.deleteMany()
+    await Review.deleteMany();
     console.log("Data Destroyed...");
     process.exit();
   } catch (err) {
