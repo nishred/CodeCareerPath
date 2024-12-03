@@ -52,10 +52,8 @@ const BootcampSchema = new mongoose.Schema(
 
     //    type : "Point",
     //    coordinates : [lat,lng],
-        
 
     //  }
-
 
     location: {
       // GeoJSON Point
@@ -143,7 +141,6 @@ BootcampSchema.pre("save", function (next) {
 });
 
 BootcampSchema.pre("save", async function (next) {
-
   const result = await geocode(this.address);
 
   const components = result.components;

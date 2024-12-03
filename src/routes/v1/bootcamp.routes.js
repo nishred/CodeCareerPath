@@ -7,11 +7,15 @@ const authorize = require("../../middlewares/authorize")
 
 const courseRouter = require("./course.routes");
 
+const reviewRouter = require("./review.routes")
+
 const { BootcampController } = require("../../controllers");
 
 const auth = require("../../middlewares/auth")
 
 router.use("/:bootcampId/courses", courseRouter); 
+
+router.use("/:bootcampId/reviews",reviewRouter)
 
 router.get("/", BootcampController.getAllBootcamps);
 

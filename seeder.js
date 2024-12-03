@@ -7,6 +7,8 @@ const Course = require("./src/models/Course");
 
 const User = require("./src/models/User");
 
+const Review = require("./src/models/Review");
+
 const { MONGO_URI } = require("./src/config/server.config");
 
 // Load env vars
@@ -27,6 +29,11 @@ const users = JSON.parse(
   fs.readFileSync(`${__dirname}/_data/users.json`, "utf-8")
 );
 
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/_data/reviews.json`, "utf-8")
+);
+
+
 const importData = async () => {
   try {
     await Bootcamp.create(bootcamps);
@@ -34,6 +41,8 @@ const importData = async () => {
     await Course.create(courses);
 
     await User.create(users);
+
+    await Review.create(reviews)
 
     console.log("Data Imported...");
     process.exit();
@@ -47,6 +56,7 @@ const deleteData = async () => {
     await Bootcamp.deleteMany();
     await Course.deleteMany();
     await User.deleteMany();
+    await Review.deleteMany()
     console.log("Data Destroyed...");
     process.exit();
   } catch (err) {
