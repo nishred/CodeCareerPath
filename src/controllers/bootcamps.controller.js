@@ -17,6 +17,7 @@ const {
   MAX_FILE_UPLOAD,
   FILE_UPLOAD_PATH,
 } = require("../config/server.config");
+const { isObjectIdOrHexString } = require("mongoose");
 
 //@desc Get all bootcamps
 //@route GET /api/v1/bootcamps
@@ -40,6 +41,8 @@ const getBootcampById = asyncHandler(async (req, res, next) => {
 
   const bootcamp = await bootcampRepository.getById(id);
 
+  console.log(bootcamp)
+
   //objectId is formatted correctly but not found in the database
   if (!bootcamp)
     throw new ErrorResponse(
@@ -58,10 +61,21 @@ const getBootcampById = asyncHandler(async (req, res, next) => {
 //@desc Update bootcamp by id
 //@route PUT /api/v1/bootcamps/:id
 //@access Private
-const updateBootcamp = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
 
-  const bootcamp = await bootcampRepository.update(id, req.body);
+// auth req.user structure
+// {
+
+//    _id : new ObjectId("")
+
+
+// }
+
+
+const updateBootcamp = asyncHandler(async (req, res, next) => {
+
+  const id = req.params.id;
+  const bootcamp = await bootcampRepository.getById(id);
+
 
   if (!bootcamp)
     throw new ErrorResponse(
@@ -69,10 +83,19 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
       StatusCodes.NOT_FOUND
     );
 
+  if (bootcamp.user.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    throw new ErrorResponse(
+      "You're not a authorized to updated this bootcamp",
+      StatusCodes.BAD_REQUEST
+    );
+  }
+
+  const updatedBootcamp = await bootcampRepository.update(id, req.body);
+
   res.status(StatusCodes.OK).json({
     success: true,
     message: `Bootcamp with id ${req.params.id} updated successfully`,
-    data: bootcamp,
+    data: updatedBootcamp,
     error: {},
   });
 });
@@ -81,7 +104,23 @@ const updateBootcamp = asyncHandler(async (req, res, next) => {
 //@route DELETE /api/v1/bootcamps/:id
 //@access Private
 const deleteBootcamp = asyncHandler(async (req, res, next) => {
-  await bootcampRepository.delete(req.params.id);
+  const id = req.params.id;
+
+  const bootcamp = await bootcampRepository.getById(id);
+
+  if (!bootcamp)
+    throw new ErrorResponse(
+      `Bootcamp with id ${id} doesn't exist`,
+      StatusCodes.BAD_REQUEST
+    );
+
+  if (req.user.role !== "admin" && req.user._id.toString() !== bootcamp.user.toString())
+    throw new ErrorResponse(
+      "User doesn't own the bootcamp",
+      StatusCodes.BAD_REQUEST
+    );
+
+  await bootcampRepository.delete(id);
 
   res.status(StatusCodes.OK).json({
     success: true,
@@ -96,10 +135,23 @@ const deleteBootcamp = asyncHandler(async (req, res, next) => {
 //@access Private
 
 const createBootcamp = asyncHandler(async (req, res, next) => {
+  if (req.user.role === "publisher") {
+    const publishedBootcamps = await bootcampRepository.getBootcampsByUser(
+      req.user._id
+    );
 
-  console.log(req.user)
+    if (publishedBootcamps.length > 0) {
+      throw new ErrorResponse(
+        "A publisher can only publish one course",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  }
 
-  const bootcamp = await bootcampRepository.create({...req.body,user : req.user._id});
+  const bootcamp = await bootcampRepository.create({
+    ...req.body,
+    user: req.user._id,
+  });
 
   res.status(StatusCodes.CREATED).json({
     success: true,

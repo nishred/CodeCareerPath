@@ -7,8 +7,6 @@ const connectDB = require("./config/db.config");
 const errorHandler = require("./utils/errorHandler");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-
-
 const fileUpload = require("express-fileupload")
 const Bootcamp = require("./models/Bootcamp");
 

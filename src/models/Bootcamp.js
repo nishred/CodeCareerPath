@@ -104,22 +104,18 @@ const BootcampSchema = new mongoose.Schema(
       type: String,
       default: "no-photo.jpg",
     },
-
     housing: {
       type: Boolean,
       default: false,
     },
-
     jobAssistance: {
       type: Boolean,
       default: false,
     },
-
     jobGuarantee: {
       type: Boolean,
       default: false,
     },
-
     acceptGi: {
       type: Boolean,
       default: false,
@@ -129,7 +125,6 @@ const BootcampSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",

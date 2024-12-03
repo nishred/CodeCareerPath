@@ -17,15 +17,21 @@ class UserRepository {
     return user;
   }
 
-  async getUserById(id)
-  {
- 
-    const user = await this.model.findById(id)
+  async getUserById(id) {
+    const user = await this.model.findById(id);
 
-    return user
-
+    return user;
   }
 
+  async getUserByResetPasswordToken(token) {
+    const user = await this.model.findOne({
+      resetpasswordtoken: token,
+      resetpasswordexpire: { $gt: Date.now() },
+    });
+
+     return user
+
+  }
 }
 
 module.exports = UserRepository;

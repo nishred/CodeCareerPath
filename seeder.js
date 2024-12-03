@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const Bootcamp = require("./src/models/Bootcamp");
 const Course = require("./src/models/Course");
 
+const User = require("./src/models/User");
+
 const { MONGO_URI } = require("./src/config/server.config");
 
 // Load env vars
@@ -21,11 +23,17 @@ const courses = JSON.parse(
   fs.readFileSync(`${__dirname}/_data/courses.json`, "utf-8")
 );
 
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/_data/users.json`, "utf-8")
+);
+
 const importData = async () => {
   try {
     await Bootcamp.create(bootcamps);
 
     await Course.create(courses);
+
+    await User.create(users);
 
     console.log("Data Imported...");
     process.exit();
@@ -37,7 +45,8 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Bootcamp.deleteMany();
-    await Course.deleteMany()
+    await Course.deleteMany();
+    await User.deleteMany();
     console.log("Data Destroyed...");
     process.exit();
   } catch (err) {

@@ -31,6 +31,8 @@ const getCourses = asyncHandler(async (req, res, next) => {
 //@desc Create a course
 //@route POST /api/v1/bootcamps/:bootcampId/courses
 //@access private
+//The owner of the bootcamp should be able to add a course and not anyone else right
+
 const createCourse = asyncHandler(async (req, res, next) => {
   const bootcampId = req.params.bootcampId;
 
@@ -42,7 +44,15 @@ const createCourse = asyncHandler(async (req, res, next) => {
       StatusCodes.NOT_FOUND
     );
 
+  if (req.user.role !== "admin" && bootcamp.user.toString() !== req.user._id)
+    throw new ErrorResponse(
+      "The user doesn't own the bootcamp",
+      StatusCodes.UNAUTHORIZED
+    );
+
   req.body.bootcamp = bootcampId;
+
+  req.body.user = bootcamp.user;
 
   const course = await courseRepository.create(req.body);
 
@@ -89,7 +99,6 @@ const getCourse = asyncHandler(async (req, res, next) => {
   });
 });
 
-
 const removeCourse = asyncHandler(async (req, res, next) => {
   const result = await courseRepository.delete(req.params.id);
 
@@ -106,5 +115,5 @@ module.exports = {
   createCourse,
   updateCourse,
   getCourse,
-  removeCourse
+  removeCourse,
 };

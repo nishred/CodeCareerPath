@@ -129,6 +129,14 @@ class BootcampRepository extends CrudRepository {
 
     return true;
   }
+
+  async getBootcampsByUser(userId) {
+    const bootcamps = await this.model.find({
+      user: userId,
+    });
+
+    return bootcamps;
+  }
 }
 
 module.exports = BootcampRepository;
